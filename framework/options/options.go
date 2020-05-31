@@ -25,6 +25,7 @@ type Options struct {
 
 type Option func(*Options)
 type disableFrameworkAutoTuning struct{}
+type inferencePrecision struct{}
 
 func WithOptions(opts *Options) Option {
 	return func(o *Options) {
@@ -55,6 +56,15 @@ func DisableFrameworkAutoTuning(disabled bool) Option {
 	}
 }
 
+func InferencePrecision(precision string) Option {
+	return func(o *Options) {
+		if o.ctx == nil {
+			o.ctx = context.Background()
+		}
+		o.ctx = context.WithValue(o.ctx, inferencePrecision{}, precision)
+	}
+}
+
 func (o *Options) DisableFrameworkAutoTuning() bool {
 	ctx := o.ctx
 	if ctx == nil {
@@ -67,8 +77,24 @@ func (o *Options) DisableFrameworkAutoTuning() bool {
 	return val
 }
 
+func (o *Options) InferencePrecision() string {
+	ctx := o.ctx
+	if ctx == nil {
+		return "fp32"
+	}
+	val, ok := ctx.Value(inferencePrecision{}).(string)
+	if !ok {
+		return "fp32"
+	}
+	return val
+}
+
 func (o *Options) SetDisableFrameworkAutoTuning(disabled bool) {
 	o.ctx = context.WithValue(o.ctx, disableFrameworkAutoTuning{}, disabled)
+}
+
+func (o *Options) SetInferencePrecision(precision string) {
+	o.ctx = context.WithValue(o.ctx, inferencePrecision{}, precision)
 }
 
 func BatchSize(n int) Option {

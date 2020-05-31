@@ -26,7 +26,7 @@ import (
 	mongodb "github.com/rai-project/database/mongodb"
 	dl "github.com/rai-project/dlframework"
 	"github.com/rai-project/dlframework/framework/agent"
-	dlcmd "github.com/rai-project/dlframework/framework/cmd"
+	// dlcmd "github.com/rai-project/dlframework/framework/cmd"
 	"github.com/rai-project/dlframework/framework/options"
 	common "github.com/rai-project/dlframework/framework/predictor"
 	"github.com/rai-project/dlframework/steps"
@@ -177,14 +177,15 @@ func runPredictUrlsCmd(c *cobra.Command, args []string) error {
 		tracer.APPLICATION_TRACE,
 		"evaluation_predict_urls",
 		opentracing.Tags{
-			"framework_name":     framework.Name,
-			"framework_version":  framework.Version,
-			"model_name":         modelName,
-			"model_version":      modelVersion,
-			"batch_size":         batchSize,
-			"use_gpu":            useGPU,
-			"gpu_metrics":        gpuMetrics,
-			"num_warmup_batches": numWarmUpUrlParts,
+			"framework_name":      framework.Name,
+			"framework_version":   framework.Version,
+			"model_name":          modelName,
+			"model_version":       modelVersion,
+			"batch_size":          batchSize,
+			"use_gpu":             useGPU,
+			"gpu_metrics":         gpuMetrics,
+			"num_warmup_batches":  numWarmUpUrlParts,
+			"inference_precision": inferencePrecision,
 		},
 	)
 	if rootSpan == nil {
@@ -197,6 +198,7 @@ func runPredictUrlsCmd(c *cobra.Command, args []string) error {
 		*model,
 		options.PredictorOptions(predOpts),
 		options.DisableFrameworkAutoTuning(disableFrameworkAutoTuning),
+		options.InferencePrecision(inferencePrecision),
 	)
 	if err != nil {
 		return err
@@ -343,7 +345,7 @@ func runPredictUrlsCmd(c *cobra.Command, args []string) error {
 	}
 
 	urlCnt := len(urls)
-	inferenceProgress := dlcmd.NewProgress("inferring", urlCnt)
+	// inferenceProgress := dlcmd.NewProgress("inferring", urlCnt)
 
 	for ii, part := range urlParts[:numUrlParts] {
 		input := make(chan interface{}, DefaultChannelBuffer)
@@ -395,12 +397,12 @@ func runPredictUrlsCmd(c *cobra.Command, args []string) error {
 			Then(steps.NewPredict(predictor)).
 			Run(input)
 
-		inferenceProgress.Add(batchSize)
+		// inferenceProgress.Add(batchSize)
 
 		for o := range output {
 			if err, ok := o.(error); ok && failOnFirstError {
 				//inferenceProgress.FinishPrint("inference halted")
-				inferenceProgress.Finish()
+				// inferenceProgress.Finish()
 
 				log.WithError(err).Error("encountered an error while performing inference")
 				os.Exit(-1)
@@ -411,7 +413,7 @@ func runPredictUrlsCmd(c *cobra.Command, args []string) error {
 	}
 
 	//inferenceProgress.FinishPrint("inference complete")
-	inferenceProgress.Finish()
+	// inferenceProgress.Finish()
 
 	rootSpan.Finish()
 	tracer.ResetStd()
@@ -439,7 +441,7 @@ func runPredictUrlsCmd(c *cobra.Command, args []string) error {
 		for range outputs {
 		}
 
-		outputDir := filepath.Join(baseDir, framework.Name, framework.Version, model.Name, model.Version, strconv.Itoa(batchSize), device, hostName)
+		outputDir := filepath.Join(baseDir, framework.Name, framework.Version, model.Name, model.Version, strconv.Itoa(batchSize), device, hostName, inferencePrecision)
 		if !com.IsDir(outputDir) {
 			os.MkdirAll(outputDir, os.ModePerm)
 		}
@@ -591,7 +593,7 @@ func runPredictUrlsCmd(c *cobra.Command, args []string) error {
 		cnt++
 	}
 
-	log.WithField("model", modelName).Info("finised inserting prediction")
+	log.WithField("model", modelName).Info("finished inserting prediction")
 
 	modelAccuracy := evaluation.ModelAccuracy{
 		ID:        bson.NewObjectId(),

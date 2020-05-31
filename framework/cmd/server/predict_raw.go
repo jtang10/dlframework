@@ -162,6 +162,7 @@ func runPredictRawCmd(c *cobra.Command, args []string) error {
 		*model,
 		options.PredictorOptions(predOpts),
 		options.DisableFrameworkAutoTuning(disableFrameworkAutoTuning),
+		options.InferencePrecision(inferencePrecision),
 	)
 	if err != nil {
 		return err

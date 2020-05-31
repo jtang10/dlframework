@@ -142,6 +142,7 @@ func runPredictDatasetCmd(c *cobra.Command, args []string) error {
 		*model,
 		options.PredictorOptions(predOpts),
 		options.DisableFrameworkAutoTuning(disableFrameworkAutoTuning),
+		options.InferencePrecision(inferencePrecision),
 	)
 	if err != nil {
 		return err
@@ -412,7 +413,7 @@ func runPredictDatasetCmd(c *cobra.Command, args []string) error {
 	}
 
 	databaseInsertProgress.Finish()
-	log.WithField("model", modelName).Info("finised inserting prediction")
+	log.WithField("model", modelName).Info("finished inserting prediction")
 
 	modelAccuracy := evaluation.ModelAccuracy{
 		ID:        bson.NewObjectId(),

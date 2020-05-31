@@ -1,6 +1,7 @@
 package dlframework
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -82,6 +83,7 @@ func (f FrameworkManifest) Models() []ModelManifest { // todo: this is not optim
 	}
 
 	names := RegisteredModelNames()
+	fmt.Println("number of models:", len(names))
 	for _, name := range names {
 		name = strings.TrimPrefix(name, cn+"/")
 		m, err := f.FindModel(name)

@@ -62,17 +62,18 @@ func (p predict) do(ctx context.Context, in0 interface{}, pipelineOpts *pipeline
 	}
 
 	predictTags := opentracing.Tags{
-		"trace_source":      "steps",
-		"step_name":         "predict",
-		"model_name":        model.GetName(),
-		"model_version":     model.GetVersion(),
-		"framework_name":    framework.GetName(),
-		"framework_version": framework.GetVersion(),
-		"batch_size":        opts.BatchSize(),
-		"feature_limit":     opts.FeatureLimit(),
-		"device":            opts.Devices().String(),
-		"trace_level":       opts.TraceLevel().String(),
-		"uses_gpu":          opts.UsesGPU(),
+		"trace_source":        "steps",
+		"step_name":           "predict",
+		"model_name":          model.GetName(),
+		"model_version":       model.GetVersion(),
+		"framework_name":      framework.GetName(),
+		"framework_version":   framework.GetVersion(),
+		"batch_size":          opts.BatchSize(),
+		"inference_precision": opts.InferencePrecision(),
+		"feature_limit":       opts.FeatureLimit(),
+		"device":              opts.Devices().String(),
+		"trace_level":         opts.TraceLevel().String(),
+		"uses_gpu":            opts.UsesGPU(),
 	}
 	predictTags["kernel_os"] = machine.Info.KernelOS
 	predictTags["os_name"] = machine.Info.OSName

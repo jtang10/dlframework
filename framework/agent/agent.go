@@ -99,6 +99,7 @@ func (p *Agent) Open(ctx context.Context, req *dl.PredictorOpenRequest) (*dl.Pre
 		*model,
 		options.PredictorOptions(opts),
 		options.DisableFrameworkAutoTuning(true),
+		options.InferencePrecision("fp32"),
 	)
 	if err != nil {
 		return nil, err
